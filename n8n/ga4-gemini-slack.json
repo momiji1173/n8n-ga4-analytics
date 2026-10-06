@@ -1,0 +1,169 @@
+{
+  "name": "GA4 × Gemini × Slack Analytics",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "faa5096b-9602-4e9c-a758-f44b8302a0df",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "propertyId": {
+          "__rl": true,
+          "value": "YOUR_GA4_PROPERTY_ID",
+          "mode": "id"
+        },
+        "metricsGA4": {
+          "metricValues": [
+            {}
+          ]
+        },
+        "dimensionsGA4": {
+          "dimensionValues": [
+            {}
+          ]
+        },
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.googleAnalytics",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "559a4dae-d070-478d-8d0b-9bb8b2af0210",
+      "name": "Get a report",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "#example-channel",
+          "mode": "name"
+        },
+        "text": "={{ $json.report }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        1008,
+        0
+      ],
+      "id": "a892cc2e-fed8-42fa-9ed9-84a29e616799",
+      "name": "Send a message"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "models/gemini-3-flash-preview"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Plain Text\nあなたはWebアクセス解析担当者です。\n以下は過去7日間のGoogle Analyticsアクセスデータです。\n{{ JSON.stringify($('Get a report').all().map(item => item.json), null, 2) }}\n参考レポート：\nMORIPOWER ホームページアクセス解析レポート\n上記のアクセスデータと参考レポートを確認する担当者向けに分析を実施してください。\nMarkdown記法（###、**など）は使用しないでください。\nSlackで見やすい文章で出力してください\n。\nデータの増減傾向を重視して分析してください。\n単日のデータではなく、過去7日間の推移から分析してください。\n以下の形式で出力してください。\n \n出力形式\n【アクセス状況】\n過去7日間の傾向を説明\n【改善点】\n3つ\n【推奨施策】\n3つ\n【担当者向けコメント】\nLooker Studioで確認すると良いポイント"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "2eafa53b-45a6-4674-bd13-c7ea022dd7ce",
+      "name": "Message a model"
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = $('Get a report').all().map(i => i.json);\n\nconst totalUsers = rows.reduce(\n  (sum, r) => sum + Number(r.totalUsers || 0),\n  0\n);\n\nconst totalSessions = rows.reduce(\n  (sum, r) => sum + Number(r.sessions || 0),\n  0\n);\n\nconst totalViews = rows.reduce(\n  (sum, r) => sum + Number(r.screenPageViews || 0),\n  0\n);\n\nconst ai = $input.first().json.content.parts[0].text;\n\nreturn [\n  {\n    json: {\n      report: `MORIPOWER 週間アクセスレポート\n\n対象期間: 過去7日間\n\n総ユーザー数: ${totalUsers}\n総セッション数: ${totalSessions}\n総ページビュー数: ${totalViews}\n\n【AI分析】\n\n${ai}\n\n【詳細レポート】\nhttps://example.com/looker-studio-report`\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        816,
+        0
+      ],
+      "id": "229f3393-0a28-431b-814c-b5a6cfc3da01",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get a report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a report": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "timezone": "Asia/Tokyo",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "tags": []
+}
