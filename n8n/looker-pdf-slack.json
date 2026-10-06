@@ -1,0 +1,71 @@
+{
+  "name": "Looker Studio PDF → Slack",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "q": "=from:data-studio-noreply@google.com has:attachment"
+        },
+        "options": {
+          "downloadAttachments": true
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "6a8d0305-c691-4ab2-86dc-b5b932a728d0",
+      "name": "Gmail Trigger"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "binaryPropertyName": "attachment_0",
+        "options": {
+          "channelId": "YOUR_SLACK_CHANNEL_ID"
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        224,
+        0
+      ],
+      "id": "8cec491e-7c64-42ad-ad29-3a116d824992",
+      "name": "Upload a file"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Upload a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "tags": []
+}
