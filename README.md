@@ -1,5 +1,5 @@
 # n8n-ga4-analytics
-Google Analytics 4（GA4）のアクセスデータをn8nで取得し、Slackへの通知やLooker Studioでの可視化を行うアクセス解析・通知自動化システム
+Google Analytics 4（GA4）のアクセスデータをn8nで取得し、geminiで分析させ、Slackへの通知やLooker Studioでの可視化を行うアクセス解析・通知自動化システム
 
 # Google Analytics 4 × n8n × Gemini
 ## アクセス解析・分析・レポート自動化システム
